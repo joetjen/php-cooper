@@ -1,0 +1,48 @@
+{
+  "name": "joetjen/cooper",
+  "description": "Loads CASC config files -- a hierarchical, extensible config language with imports, variables, interpolation, loops, and consumer-registered resolvers/tags -- into native PHP values, secrets redacted by default.",
+  "keywords": ["casc", "cooper", "config", "configuration", "dotenv"],
+  "type": "library",
+  "homepage": "http://github.com/joetjen/php-cooper",
+  "minimum-stability": "stable",
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "Jan Oetjen",
+      "email": "joetjen.riveting388@passmail.net"
+    }
+  ],
+  "support": {
+    "issues": "http://github.com/joetjen/php-cooper/issues"
+  },
+  "require": {
+    "php": "^8.2",
+    "ext-bcmath": "*",
+    "ext-mbstring": "*",
+    "vlucas/phpdotenv": "^5.6"
+  },
+  "require-dev": {
+    "phpstan/phpstan": "^2.2",
+    "phpunit/phpunit": "^11.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "JOetjen\\Cooper\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "JOetjen\\Cooper\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit",
+    "test:coverage": "phpunit --coverage-text",
+    "analyse": "phpstan analyse src --level=8",
+    "precommit": ["@analyse", "@test"],
+    "docs": "docker run --rm -v $(pwd):/data phpdoc/phpdoc:3"
+  },
+  "config": {
+    "sort-packages": true
+  }
+}
