@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] - 2026-10-08
 
 ### Added
 
@@ -67,7 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   document read with the value it saw -- what a cache kept outside this
   library (a compiled PHP file) needs to know when it has gone stale.
 - `Cooper::loadFile()`/`Cooper::loadString()`: a PHP port of the Elixir
-  [`cooper`](https://github.com/joetjen/cooper) 0.4.0, loading CASC
+  [`cooper`](https://github.com/joetjen/cooper), loading CASC
   config files into native PHP values -- the whole language as the
   Elixir original implements it: every value type (CASC.md §6),
   dotted paths and blocks (§5.4), imports with globs, braces,
@@ -206,9 +206,8 @@ matching it (and CASC.md as amended alongside it):
 
 ### Compatibility
 
-Matches the Elixir reference (`cooper`, unreleased at the time of
-writing, past its `0.4.0`) case for case on the shared conformance
-corpus. The reference has fixed every place it contradicted CASC.md
+Matches the Elixir reference, [`cooper`](https://hex.pm/packages/cooper)
+0.5.0, case for case on the shared conformance corpus. The reference has fixed every place it contradicted CASC.md
 that porting it or the corpus surfaced -- see `README.md`. What remains
 different is inherent to PHP: `!module(...)` yields a class-string
 where the reference yields a module atom, and an integer (a duration's or byte size's count included) is

@@ -159,8 +159,8 @@ Porting the Elixir original also found ten places where it (as of
 0.4.0) contradicted CASC.md, and a corpus of conformance cases shared
 by every Cooper implementation (`tests/conformance`, see its
 `DIVERGENCES.md`) found fourteen more. All are fixed in the Elixir
-original (unreleased at the time of writing), which is the reference
-this port matches case for case:
+original's 0.5.0, which is the reference this port matches case for
+case:
 
 - `foo "bar"` -- an assignment without `=` to a string, §5.3's own
   example -- is an assignment, not a failed `import`.
