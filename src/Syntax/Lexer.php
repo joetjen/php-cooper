@@ -225,7 +225,10 @@ final class Lexer
             [TokenType::TrueKw, '/\Gtrue/'],
             [TokenType::FalseKw, '/\Gfalse/'],
             [TokenType::InfKw, '/\G[+-]?inf(?![A-Za-z0-9_+\-?!])/'],
-            [TokenType::Ident, '/\G[A-Za-z][A-Za-z0-9_+\-]*+[?!]?/'],
+            // A name may begin with `_` (CASC.md §4.1) -- `__sentry__`,
+            // `__foo__`. Nothing else starts with one: a digit separator
+            // is only ever inside a number.
+            [TokenType::Ident, '/\G[A-Za-z_][A-Za-z0-9_+\-]*+[?!]?/'],
             [TokenType::Date, '/\G\d{4}-\d{2}-\d{2}/'],
             [TokenType::Time, "/\\G\\d{2}:\\d{2}:\\d{2}(?:\\.{$digits})?+/"],
             [TokenType::DateTime, "/\\G\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.{$digits})?+(?:Z|[+-]\\d{2}:\\d{2})?+/"],
