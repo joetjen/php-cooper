@@ -145,6 +145,48 @@ final class ResolverTest extends CooperTestCase
         self::assertMatchesRegularExpression('/\Acircular %\{\.\.\.\} reference: (a|b|c) -> (a|b|c) -> (a|b|c) -> \1\z/', $message);
     }
 
+    public function testAPathIsFollowedThroughAValueThatIsItselfAReference(): void
+    {
+        $resolved = self::resolve("origins.eu.code = \"EU\"\norigins.us.code = \"US\"\norigin = %{origins.eu}\ncode = %{origin.code}");
+
+        self::assertIsArray($resolved);
+        self::assertSame('EU', $resolved['code']);
+    }
+
+    public function testAPathIsFollowedThroughAChainOfReferences(): void
+    {
+        $resolved = self::resolve("a.b.c = 1\nx = %{a}\ny = %{x.b}\nz = %{y.c}");
+
+        self::assertIsArray($resolved);
+        self::assertSame(1, $resolved['z']);
+    }
+
+    public function testAPathIsFollowedThroughALoopVariableBoundToABlockElement(): void
+    {
+        $resolved = self::resolve("@origins = [{ code = \"EU\" }]\nfor @o in @{origins} as picked.first {\n  origin = @{o}\n}\ncode = %{picked.first.origin.code}");
+
+        self::assertIsArray($resolved);
+        self::assertSame('EU', $resolved['code']);
+    }
+
+    public function testAKeyMissingBehindAReferenceTakesTheDefault(): void
+    {
+        $resolved = self::resolve("origins.eu.code = \"EU\"\norigin = %{origins.eu}\nname = %{origin.name:\"none\"}");
+
+        self::assertIsArray($resolved);
+        self::assertSame('none', $resolved['name']);
+    }
+
+    public function testAPathCannotBeFollowedIntoAReferenceToAScalar(): void
+    {
+        self::assertSame('undefined reference %{b.d}', self::resolveError("a = 1\nb = %{a}\nc = %{b.d}")->getMessage());
+    }
+
+    public function testAReferenceIntoItsOwnValueIsACycle(): void
+    {
+        self::assertSame('circular %{...} reference: a.b -> a -> a.b', self::resolveError('a = %{a.b}')->getMessage());
+    }
+
     // ---- !{resolver:payload} -----------------------------------------------------
 
     public function testAResolverGetsThePayloadVerbatim(): void
