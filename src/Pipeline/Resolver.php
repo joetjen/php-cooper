@@ -495,22 +495,28 @@ final class Resolver
             throw self::error('circular %{...} reference: ' . implode(' -> ', $chain));
         }
 
-        [$found, $raw] = $this->fetch($this->tree, $path);
-        if (!$found) {
-            return [false, null];
-        }
-
-        // Resolved out of turn, for a reference: while it is, the key
-        // being resolved is the one the reference reached.
+        // In progress from before the fetch: reaching `$path` may resolve
+        // a node along the way (see `fetch()`), and one that leads back
+        // here -- `a = %{a.b}` -- is part of the cycle.
         $this->inProgress[] = $path;
-        $at = $this->at;
-        $this->at = $path;
         try {
-            $resolved = $this->value($raw);
+            [$found, $raw] = $this->fetch($this->tree, $path);
+            if (!$found) {
+                return [false, null];
+            }
+
+            // Resolved out of turn, for a reference: while it is, the key
+            // being resolved is the one the reference reached.
+            $at = $this->at;
+            $this->at = $path;
+            try {
+                $resolved = $this->value($raw);
+            } finally {
+                $this->at = $at;
+            }
         } finally {
-            $this->at = $at;
+            array_pop($this->inProgress);
         }
-        array_pop($this->inProgress);
 
         $this->cache[$key] = $resolved;
 
@@ -518,25 +524,85 @@ final class Resolver
     }
 
     /**
-     * Walks `$path` through maps, resolving a `Layered` value it runs
-     * through before continuing into it.
+     * Walks `$path` through the unresolved tree's maps, resolving a
+     * `Layered` value it runs through before continuing into it.
+     *
+     * Any other unresolved node the path runs through with segments
+     * still left -- a reference, a loop's copied block element, a secret,
+     * a tagged value -- is resolved too: CASC.md §7.3 resolves against
+     * the final tree, in which `origin = %{origins.eu}` *is* the
+     * `origins.eu` block, so `%{origin.code}` must find its `code`. Such
+     * a node is resolved through `path()` under the segments walked so
+     * far, so it is memoised once and a reference into its own value
+     * (`a = %{a.b}`) is reported as the cycle it is. Its value is fully
+     * resolved, so the rest of the walk goes through maps only -- plain
+     * or secret, see `fetchResolved()`; a value resolving to anything but
+     * a map leaves the path undefined.
      *
      * @param list<string> $path
-     * @return array{0: bool, 1: mixed}
+     * @return array{0: bool, 1: mixed} [found, value]
      */
     private function fetch(mixed $tree, array $path): array
     {
-        foreach ($path as $segment) {
+        $walked = [];
+        foreach ($path as $i => $segment) {
             if ($tree instanceof Layered) {
                 $tree = $this->layered($tree);
             }
-            if (!$tree instanceof MapNode || !$tree->has($segment)) {
+            if ($tree instanceof MapNode) {
+                if (!$tree->has($segment)) {
+                    return [false, null];
+                }
+                $tree = $tree->get($segment);
+                $walked[] = $segment;
+                continue;
+            }
+            // Any object, not a list of the ones that can stand for a
+            // map: a leaf (a date, an address) resolves to itself and is
+            // undefined below like any other non-map.
+            if (!is_object($tree) || $walked === []) {
                 return [false, null];
             }
-            $tree = $tree->get($segment);
+            [$found, $resolved] = $this->path($walked);
+            if (!$found) {
+                return [false, null];
+            }
+
+            return self::fetchResolved($resolved, array_slice($path, $i));
         }
 
         return [true, $tree];
+    }
+
+    /**
+     * The rest of a path through a value already resolved: plain maps,
+     * and a secret one (`*site = @{s}` copying a block element), whose
+     * value found inside stays secret -- secrecy travels with the value,
+     * as `index()` keeps it for an element of a secret list. A list or a
+     * scalar ends the path as undefined.
+     *
+     * @param list<string> $path
+     * @return array{0: bool, 1: mixed} [found, value]
+     */
+    private static function fetchResolved(mixed $value, array $path): array
+    {
+        if ($path === []) {
+            return [true, $value];
+        }
+        if ($value instanceof CooperSecret) {
+            [$found, $inner] = self::fetchResolved($value->reveal(), $path);
+            if (!$found) {
+                return [false, null];
+            }
+
+            return [true, $inner instanceof CooperSecret ? $inner : new CooperSecret($inner)];
+        }
+        $segment = $path[0];
+        if (!$value instanceof MapNode || !$value->has($segment)) {
+            return [false, null];
+        }
+
+        return self::fetchResolved($value->get($segment), array_slice($path, 1));
     }
 
     // ---- Layered (a `for ... from` template plus overrides) -----------------
