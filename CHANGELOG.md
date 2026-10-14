@@ -18,9 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   such as a loop variable bound to a block element. A path continuing
   into a value that resolves to anything but a map is undefined, and
   takes its default if it has one. A path through its own key
-  (`a = %{a.b}`) is a cycle, reported as `a.b -> a -> a.b`. Conformance
-  cases `188-ref-through-ref`, `189-ref-through-own-key` and
-  `190-ref-through-scalar`; `casc/CASC.md` updated from the reference.
+  (`a = %{a.b}`) is a cycle, reported as `a.b -> a -> a.b`. A path into
+  a secret block -- `*site = @{s}` copying a block element -- finds its
+  value, and that value stays secret. Conformance cases
+  `188-ref-through-ref`, `189-ref-through-own-key`,
+  `190-ref-through-scalar` and `191-ref-into-secret-block`;
+  `casc/CASC.md` updated from the reference.
 
 ## [0.1.1] - 2026-10-13
 

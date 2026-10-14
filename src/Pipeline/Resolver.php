@@ -535,8 +535,9 @@ final class Resolver
      * a node is resolved through `path()` under the segments walked so
      * far, so it is memoised once and a reference into its own value
      * (`a = %{a.b}`) is reported as the cycle it is. Its value is fully
-     * resolved, so the rest of the walk goes through plain maps only; a
-     * value resolving to anything but a map leaves the path undefined.
+     * resolved, so the rest of the walk goes through maps only -- plain
+     * or secret, see `fetchResolved()`; a value resolving to anything but
+     * a map leaves the path undefined.
      *
      * @param list<string> $path
      * @return array{0: bool, 1: mixed} [found, value]
@@ -574,22 +575,34 @@ final class Resolver
     }
 
     /**
-     * The rest of a path through a value already resolved: plain maps
-     * only -- a secret block, a list, or a scalar ends it as undefined.
+     * The rest of a path through a value already resolved: plain maps,
+     * and a secret one (`*site = @{s}` copying a block element), whose
+     * value found inside stays secret -- secrecy travels with the value,
+     * as `index()` keeps it for an element of a secret list. A list or a
+     * scalar ends the path as undefined.
      *
      * @param list<string> $path
      * @return array{0: bool, 1: mixed} [found, value]
      */
     private static function fetchResolved(mixed $value, array $path): array
     {
-        foreach ($path as $segment) {
-            if (!$value instanceof MapNode || !$value->has($segment)) {
+        if ($path === []) {
+            return [true, $value];
+        }
+        if ($value instanceof CooperSecret) {
+            [$found, $inner] = self::fetchResolved($value->reveal(), $path);
+            if (!$found) {
                 return [false, null];
             }
-            $value = $value->get($segment);
+
+            return [true, $inner instanceof CooperSecret ? $inner : new CooperSecret($inner)];
+        }
+        $segment = $path[0];
+        if (!$value instanceof MapNode || !$value->has($segment)) {
+            return [false, null];
         }
 
-        return [true, $value];
+        return self::fetchResolved($value->get($segment), array_slice($path, 1));
     }
 
     // ---- Layered (a `for ... from` template plus overrides) -----------------

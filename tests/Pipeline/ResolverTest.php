@@ -169,6 +169,15 @@ final class ResolverTest extends CooperTestCase
         self::assertSame('EU', $resolved['code']);
     }
 
+    public function testAPathIsFollowedIntoASecretBlockElementAndWhatItFindsStaysSecret(): void
+    {
+        $resolved = self::resolve("@sites = [{ host = \"a\" }]\nfor @s in @{sites} as picked.first {\n  *site = @{s}\n}\nhost = %{picked.first.site.host}");
+
+        self::assertIsArray($resolved);
+        self::assertInstanceOf(CooperSecret::class, $resolved['host']);
+        self::assertSame('a', $resolved['host']->reveal());
+    }
+
     public function testAKeyMissingBehindAReferenceTakesTheDefault(): void
     {
         $resolved = self::resolve("origins.eu.code = \"EU\"\norigin = %{origins.eu}\nname = %{origin.name:\"none\"}");
