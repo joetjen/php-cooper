@@ -9,6 +9,7 @@ use JOetjen\Cooper\CooperError;
 use JOetjen\Cooper\Pipeline\Grammar;
 use JOetjen\Cooper\Pipeline\Native;
 use JOetjen\Cooper\Tests\Support\CooperTestCase;
+use JOetjen\Cooper\Value\CooperAtom;
 use JOetjen\Cooper\Value\CooperBytes;
 use JOetjen\Cooper\Value\CooperDuration;
 use JOetjen\Cooper\Value\CooperSecret;
@@ -20,6 +21,30 @@ use JOetjen\Cooper\Value\CooperSecret;
  */
 final class SpecCoverageTest extends CooperTestCase
 {
+    // CASC.md §4.1. Once the corpus's case `014-underscore-names`, now
+    // the Cooper Conformance Suite's; kept here so this repo's own suite
+    // still covers it.
+    public function testANameMayBeginWithAnUnderscoreAsAKeyAVariableOrAnAtom(): void
+    {
+        self::assertEquals(
+            [
+                '__foo__' => 2,
+                'text' => 'x-2',
+                'sentry' => CooperAtom::of('__sentry__'),
+                'colon' => CooperAtom::of('__sentry__'),
+                'private' => CooperAtom::of('_private'),
+            ],
+            self::load(<<<'CASC'
+                @__foo__ = 2
+                __foo__ = @{__foo__}
+                text = "x-@{__foo__}"
+                sentry = __sentry__
+                colon = :__sentry__
+                private = _private
+                CASC),
+        );
+    }
+
     public function testTheGuardWorkedExampleVerbatim(): void
     {
         self::assertSame(

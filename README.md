@@ -159,9 +159,9 @@ PHP-specific choices:
   callbacks instead of `:telemetry`.
 
 Porting the Elixir original also found ten places where it (as of
-0.4.0) contradicted CASC.md, and a corpus of conformance cases shared
-by every Cooper implementation (`tests/conformance`, see its
-`DIVERGENCES.md`) found fourteen more. All are fixed in the Elixir
+0.4.0) contradicted CASC.md, and the corpus of conformance cases
+shared by every Cooper implementation (since retired for the Cooper
+Conformance Suite) found fourteen more. All are fixed in the Elixir
 original's 0.5.0, which is the reference this port matches case for
 case:
 
@@ -249,9 +249,11 @@ refused it (`lexer`, `parser`, `action`, `import`, `merge`, `loop`,
 `resolve`, `dotenv`). It exits non-zero only when the request cannot be
 read or the answer cannot be written. The work, and the load options
 every case runs with, are in `JOetjen\Cooper\ConformanceAdapter`, the
-twin of the Elixir reference's `Cooper.Conformance`; the in-repo corpus
-(`tests/conformance`) loads with the same options. The command is a
+twin of the Elixir reference's `Cooper.Conformance`. The command is a
 development tool and is not listed under `composer.json`'s `bin`.
+
+Behaviour is checked across implementations by the suite, not by a
+corpus in this repository: a behaviour change needs a case there.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how to propose changes.
 
