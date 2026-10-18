@@ -1,0 +1,3 @@
+#@version = 1.0
+m = !module("Acme.Payments.StripeClient")
+n = !module("${FORMATTER}")

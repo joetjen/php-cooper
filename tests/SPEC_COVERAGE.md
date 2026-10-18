@@ -58,7 +58,10 @@ ever fails with `CooperError`).
 
 Every section is also exercised end to end by the shared conformance
 corpus (`ConformanceTest`, `tests/conformance`), each case compared with
-the Elixir reference's own result.
+the Elixir reference's own result, and loaded with the options of the
+Cooper Conformance Suite's adapter (`ConformanceAdapterTest`: the
+suite's typed JSON, every error as its §9.5 stage, the request and
+answer files, and the command).
 
 ## Open design questions CASC.md doesn't answer
 

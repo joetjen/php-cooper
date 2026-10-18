@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **An adapter for the Cooper Conformance Suite**, the twin of the
+  Elixir reference's `Cooper.Conformance`: `php bin/cooper-conformance
+  REQUEST ANSWER`, its work in `ConformanceAdapter`. It reads a JSON
+  request of `load` cases and answers each, in order, with the loaded
+  value in the suite's typed JSON (`{"integer": "42"}`,
+  `{"float": "2.0"}`, `{"keyword": "info"}`, `{"map": [...]}`, CASC's
+  own values as tuples tagged `casc.duration`, `casc.secret`,
+  `casc.module`, ...) or with the stage of the error that refused it.
+  An unknown operation and a crash answer for their own case only; the
+  command exits non-zero only when the request cannot be read or the
+  answer cannot be written. Every case loads with the suite's standard
+  options: its environment, no `.env`, the document's directory as the
+  root, the resolvers `echo` and `fail`, the tag `twice` and the import
+  scheme `mem`. A module answers by the name CASC wrote (`Foo.Bar`),
+  not the class-string a load gives back.
+
+### Changed
+
+- The in-repo conformance corpus loads with the adapter's options and
+  renders a module by its written name, so cases `163` and `920` match
+  the reference's expected result and their `*.php.json` overrides are
+  gone.
+
 ## [0.1.2] - 2026-10-14
 
 ### Fixed
