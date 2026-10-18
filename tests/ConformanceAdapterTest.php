@@ -150,24 +150,24 @@ final class ConformanceAdapterTest extends TestCase
     public function testADurationAndAByteSizeAreTaggedWithTheirBaseUnit(): void
     {
         self::assertSame(
-            self::tagged('casc.duration', ['integer' => '300000000000']),
+            self::tagged('casc/duration', ['integer' => '300000000000']),
             ConformanceAdapter::encode(new CooperDuration(300_000_000_000)),
         );
         self::assertSame(
-            self::tagged('casc.bytes', ['integer' => '512']),
+            self::tagged('casc/bytes', ['integer' => '512']),
             ConformanceAdapter::encode(new CooperBytes(512)),
         );
         self::assertSame(
-            self::tagged('casc.bytes', ['integer' => '123456789012345678901']),
+            self::tagged('casc/bytes', ['integer' => '123456789012345678901']),
             ConformanceAdapter::encode(new CooperBytes(new CooperInteger('123456789012345678901'))),
         );
     }
 
     public function testASecretIsTaggedAndCarriesItsShownFormWhenPartlyRedacted(): void
     {
-        self::assertSame(self::tagged('casc.secret', 's'), ConformanceAdapter::encode(new CooperSecret('s')));
+        self::assertSame(self::tagged('casc/secret', 's'), ConformanceAdapter::encode(new CooperSecret('s')));
         self::assertSame(
-            self::tagged('casc.secret', 'http://a', 'http://[~~REDACTED~~]'),
+            self::tagged('casc/secret', 'http://a', 'http://[~~REDACTED~~]'),
             ConformanceAdapter::encode(new CooperSecret('http://a', 'http://[~~REDACTED~~]')),
         );
     }
@@ -175,43 +175,43 @@ final class ConformanceAdapterTest extends TestCase
     public function testAModuleIsTaggedWithItsNameAsCascWritesIt(): void
     {
         self::assertSame(
-            self::tagged('casc.module', 'Foo.Bar'),
+            self::tagged('casc/module', 'Foo.Bar'),
             ConformanceAdapter::encode(new ConformanceModule('Foo\\Bar')),
         );
     }
 
     public function testInfinityIsATaggedFloat(): void
     {
-        self::assertSame(self::tagged('casc.float', 'inf'), ConformanceAdapter::encode(INF));
-        self::assertSame(self::tagged('casc.float', '-inf'), ConformanceAdapter::encode(-INF));
+        self::assertSame(self::tagged('casc/float', 'inf'), ConformanceAdapter::encode(INF));
+        self::assertSame(self::tagged('casc/float', '-inf'), ConformanceAdapter::encode(-INF));
     }
 
     public function testAnAddressIsTaggedWithItsCanonicalText(): void
     {
-        self::assertSame(self::tagged('casc.ipv4', '10.0.0.1'), ConformanceAdapter::encode(CooperIPv4::parse('10.0.0.1')));
-        self::assertSame(self::tagged('casc.ipv4', '10.0.0.0/8'), ConformanceAdapter::encode(CooperIPv4::parse('10.0.0.0/8')));
-        self::assertSame(self::tagged('casc.ipv6', '2001:db8::1'), ConformanceAdapter::encode(CooperIPv6::parse('2001:0db8:0:0:0:0:0:1')));
+        self::assertSame(self::tagged('casc/ipv4', '10.0.0.1'), ConformanceAdapter::encode(CooperIPv4::parse('10.0.0.1')));
+        self::assertSame(self::tagged('casc/ipv4', '10.0.0.0/8'), ConformanceAdapter::encode(CooperIPv4::parse('10.0.0.0/8')));
+        self::assertSame(self::tagged('casc/ipv6', '2001:db8::1'), ConformanceAdapter::encode(CooperIPv6::parse('2001:0db8:0:0:0:0:0:1')));
     }
 
     public function testDatesAndTimesAreTaggedIso8601(): void
     {
-        self::assertSame(self::tagged('casc.date', '2026-10-18'), ConformanceAdapter::encode(new CooperDate(2026, 10, 18)));
-        self::assertSame(self::tagged('casc.time', '07:32:00'), ConformanceAdapter::encode(new CooperTime(7, 32, 0)));
+        self::assertSame(self::tagged('casc/date', '2026-10-18'), ConformanceAdapter::encode(new CooperDate(2026, 10, 18)));
+        self::assertSame(self::tagged('casc/time', '07:32:00'), ConformanceAdapter::encode(new CooperTime(7, 32, 0)));
         self::assertSame(
-            self::tagged('casc.local-date-time', '2026-10-18T07:32:00'),
+            self::tagged('casc/local-date-time', '2026-10-18T07:32:00'),
             ConformanceAdapter::encode(new CooperLocalDateTime(new CooperDate(2026, 10, 18), new CooperTime(7, 32, 0))),
         );
         self::assertSame(
-            self::tagged('casc.date-time', '2026-10-18T07:32:00Z'),
+            self::tagged('casc/date-time', '2026-10-18T07:32:00Z'),
             ConformanceAdapter::encode(new CooperDateTime(new \DateTimeImmutable('2026-10-18T07:32:00Z'))),
         );
     }
 
     public function testAFractionalSecondKeepsTheWrittenPrecision(): void
     {
-        self::assertSame(self::tagged('casc.time', '07:32:00.120'), ConformanceAdapter::encode(new CooperTime(7, 32, 0, 120000, 3)));
+        self::assertSame(self::tagged('casc/time', '07:32:00.120'), ConformanceAdapter::encode(new CooperTime(7, 32, 0, 120000, 3)));
         self::assertSame(
-            self::tagged('casc.date-time', '2026-10-18T07:32:00.120Z'),
+            self::tagged('casc/date-time', '2026-10-18T07:32:00.120Z'),
             ConformanceAdapter::encode(new CooperDateTime(new \DateTimeImmutable('2026-10-18T07:32:00.12Z'), 3)),
         );
     }
@@ -267,8 +267,8 @@ final class ConformanceAdapterTest extends TestCase
             ['results' => [[
                 'id' => 'c: module.casc',
                 'result' => ['map' => [
-                    ['m', self::tagged('casc.module', 'Acme.Payments.StripeClient')],
-                    ['n', self::tagged('casc.module', 'Foo.Bar')],
+                    ['m', self::tagged('casc/module', 'Acme.Payments.StripeClient')],
+                    ['n', self::tagged('casc/module', 'Foo.Bar')],
                 ]],
             ]]],
             $answer,

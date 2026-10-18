@@ -20,8 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   request of `load` cases and answers each, in order, with the loaded
   value in the suite's typed JSON (`{"integer": "42"}`,
   `{"float": "2.0"}`, `{"keyword": "info"}`, `{"map": [...]}`, CASC's
-  own values as tuples tagged `casc.duration`, `casc.secret`,
-  `casc.module`, ...) or with the stage of the error that refused it.
+  own values as tuples tagged with a namespaced keyword, `casc/duration`,
+  `casc/secret`, `casc/module`, ...) or with the stage of the error that refused it.
   An unknown operation and a crash answer for their own case only; the
   command exits non-zero only when the request cannot be read or the
   answer cannot be written. Every case loads with the suite's standard
