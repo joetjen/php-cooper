@@ -55,10 +55,10 @@ use JOetjen\Cooper\Value\CooperTuple;
  * strings, booleans and `null` as they are; a float's text is the one
  * Elixir's `Float.to_string/1` writes (`2.0`, `1.0e3`), and a map's
  * pairs are sorted by key. What CASC has and Praxis
- * notation has no literal for is a tuple tagged with a dotted keyword
- * -- `casc.duration`, `casc.bytes`, `casc.secret`, `casc.module`,
- * `casc.float`, `casc.ipv4`, `casc.ipv6`, `casc.date`, `casc.time`,
- * `casc.local-date-time`, `casc.date-time` -- which no CASC atom can be,
+ * notation has no literal for is a tuple tagged with a namespaced keyword
+ * -- `casc/duration`, `casc/bytes`, `casc/secret`, `casc/module`,
+ * `casc/float`, `casc/ipv4`, `casc/ipv6`, `casc/date`, `casc/time`,
+ * `casc/local-date-time`, `casc/date-time` -- which no CASC atom can be,
  * so a tag never reads as a tuple a document wrote.
  */
 final class ConformanceAdapter
@@ -191,23 +191,23 @@ final class ConformanceAdapter
             $value === null, is_bool($value), is_string($value) => $value,
             is_int($value) => ['integer' => (string) $value],
             $value instanceof CooperInteger => ['integer' => $value->digits],
-            is_float($value) && is_infinite($value) => self::tagged('casc.float', $value > 0 ? 'inf' : '-inf'),
+            is_float($value) && is_infinite($value) => self::tagged('casc/float', $value > 0 ? 'inf' : '-inf'),
             // Elixir's `Float.to_string/1`, which the reference answers with.
             is_float($value) && !is_nan($value) => ['float' => Display::float($value)],
             $value instanceof CooperAtom => ['keyword' => $value->name],
-            $value instanceof ConformanceModule => self::tagged('casc.module', $value->writtenName()),
+            $value instanceof ConformanceModule => self::tagged('casc/module', $value->writtenName()),
             is_array($value) => array_map(self::encode(...), array_values($value)),
-            $value instanceof CooperDuration => self::tagged('casc.duration', self::encode($value->nanoseconds)),
-            $value instanceof CooperBytes => self::tagged('casc.bytes', self::encode($value->bytes)),
+            $value instanceof CooperDuration => self::tagged('casc/duration', self::encode($value->nanoseconds)),
+            $value instanceof CooperBytes => self::tagged('casc/bytes', self::encode($value->bytes)),
             $value instanceof CooperSecret => $value->redacted === null
-                ? self::tagged('casc.secret', self::encode($value->reveal()))
-                : self::tagged('casc.secret', self::encode($value->reveal()), $value->redacted),
-            $value instanceof CooperIPv4 => self::tagged('casc.ipv4', (string) $value),
-            $value instanceof CooperIPv6 => self::tagged('casc.ipv6', (string) $value),
-            $value instanceof CooperDate => self::tagged('casc.date', (string) $value),
-            $value instanceof CooperTime => self::tagged('casc.time', (string) $value),
-            $value instanceof CooperLocalDateTime => self::tagged('casc.local-date-time', $value->toIso8601()),
-            $value instanceof CooperDateTime => self::tagged('casc.date-time', $value->toIso8601()),
+                ? self::tagged('casc/secret', self::encode($value->reveal()))
+                : self::tagged('casc/secret', self::encode($value->reveal()), $value->redacted),
+            $value instanceof CooperIPv4 => self::tagged('casc/ipv4', (string) $value),
+            $value instanceof CooperIPv6 => self::tagged('casc/ipv6', (string) $value),
+            $value instanceof CooperDate => self::tagged('casc/date', (string) $value),
+            $value instanceof CooperTime => self::tagged('casc/time', (string) $value),
+            $value instanceof CooperLocalDateTime => self::tagged('casc/local-date-time', $value->toIso8601()),
+            $value instanceof CooperDateTime => self::tagged('casc/date-time', $value->toIso8601()),
             $value instanceof CooperTuple => ['tuple' => array_map(self::encode(...), $value->items)],
             $value instanceof MapNode => ['map' => self::pairs($value)],
             default => throw new \InvalidArgumentException('the suite has no type for ' . get_debug_type($value)),
@@ -289,7 +289,7 @@ final class ConformanceAdapter
     }
 
     /**
-     * A tuple tagged with a dotted keyword: `{"tuple": [{"keyword": tag}, ...items]}`.
+     * A tuple tagged with a namespaced keyword: `{"tuple": [{"keyword": tag}, ...items]}`.
      *
      * @return array{tuple: list<mixed>}
      */

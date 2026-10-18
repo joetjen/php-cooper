@@ -237,7 +237,11 @@ php bin/cooper-conformance request.json answer.json
 
 It reads `{"cases": [{"id": ..., "operation": "load", "document":
 "/abs/path.casc"}]}` and writes one result per case, in order: the
-loaded value in the suite's typed JSON, or the stage of the error that
+loaded value in the suite's typed JSON (what Praxis notation has no
+literal for is a tuple tagged with a namespaced keyword: `casc/duration`,
+`casc/bytes`, `casc/secret`, `casc/module`, `casc/float`, `casc/ipv4`,
+`casc/ipv6`, `casc/date`, `casc/time`, `casc/local-date-time`,
+`casc/date-time`), or the stage of the error that
 refused it (`lexer`, `parser`, `action`, `import`, `merge`, `loop`,
 `resolve`, `dotenv`). It exits non-zero only when the request cannot be
 read or the answer cannot be written. The work, and the load options
