@@ -14,9 +14,9 @@ use PHPUnit\Framework\TestCase;
  * result is compared with `<case>.expected.json`, which the oracle wrote
  * by running the same file through the Elixir reference.
  *
- * A `<case>.php.json` overrides the expected file where CASC.md leaves
- * the result to the host language; each one is listed, with its reason,
- * in `tests/conformance/DIVERGENCES.md`.
+ * A `<case>.php.json` would override the expected file where CASC.md
+ * leaves the result to the host language, listed with its reason in
+ * `tests/conformance/DIVERGENCES.md`; there is none at present.
  */
 final class ConformanceTest extends TestCase
 {

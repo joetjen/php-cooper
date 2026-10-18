@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace JOetjen\Cooper\Tests\Support;
 
+use JOetjen\Cooper\ConformanceAdapter;
+use JOetjen\Cooper\ConformanceModule;
 use JOetjen\Cooper\CooperError;
-use JOetjen\Cooper\Dotenv;
 use JOetjen\Cooper\Node\MapNode;
-use JOetjen\Cooper\Pipeline\Grammar;
-use JOetjen\Cooper\Pipeline\Resolver;
 use JOetjen\Cooper\Value\CooperAtom;
 use JOetjen\Cooper\Value\CooperBytes;
 use JOetjen\Cooper\Value\CooperDate;
@@ -27,78 +26,27 @@ use JOetjen\Cooper\Value\CooperTuple;
  * cases every Cooper implementation runs): the load options each case
  * runs with, and the implementation-neutral JSON rendering a result is
  * compared in. Both MUST stay identical to the reference's oracle
- * (`node-cooper/scripts/oracle.exs`, run against `cooper`).
+ * (`node-cooper/scripts/oracle.exs`, run against `cooper`). The options
+ * are `ConformanceAdapter`'s, the Cooper Conformance Suite's standard;
+ * a module renders by the name CASC wrote, as the oracle renders it.
  */
 final class Conformance
 {
-    public const ENV = [
-        'REGION' => 'eu-west',
-        'PORT' => '9090',
-        'DEBUG' => 'true',
-        'EMPTY' => '',
-        'LIST' => 'a, b;c',
-        'SCHEME' => 'HTTPS://',
-        'PADDED' => '  padded  ',
-        'TOKEN_1' => 'tok-one',
-        'TOKEN_2' => 'tok-two',
-        'FEATURE' => 'on',
-        'WHICH' => 'dev',
-        'FORMATTER' => 'Foo.Bar',
-        'COOPER_ENV' => 'conformance',
-    ];
-
-    private const MEM = [
-        'base' => "#@version = 1\nfrom_mem = true\nshared = \"mem\"\n",
-        'vars' => "#@version = 1\n@mem_var = \"from-mem\"\n",
-    ];
-
     private function __construct()
     {
     }
 
     /**
-     * One case's outcome: `['ok' => canon]` or `['error' => stage]`.
+     * One case's outcome: `['ok' => canon]` or `['error' => stage]`,
+     * loaded with the suite's standard options -- the conformance
+     * adapter's own, so the corpus and the suite load alike.
      *
      * @return array<string, mixed>
      */
     public static function run(string $file): array
     {
-        $dir = dirname($file);
-        $source = (string) file_get_contents($file);
-
         try {
-            $env = Dotenv::env(['dotenv' => false, 'env' => self::ENV]);
-            $tree = Grammar::runTree($source, [
-                'root' => $dir,
-                'file' => $file,
-                'env' => $env,
-                'importSchemes' => [
-                    'mem' => static fn (string $rest): string => self::MEM[$rest] ?? throw new \RuntimeException('enoent'),
-                ],
-            ]);
-            [$resolved] = Resolver::resolve($tree->tree, [
-                'vars' => $tree->vars,
-                'env' => $env,
-                'raw' => true,
-                'resolvers' => [
-                    'echo' => static fn (string $payload): string => $payload,
-                    'fail' => static fn (string $payload): never => throw new \RuntimeException("refused {$payload}"),
-                ],
-                'tags' => [
-                    'twice' => static function (mixed $arg): int|string {
-                        if (is_int($arg)) {
-                            return $arg * 2;
-                        }
-                        if (is_string($arg)) {
-                            return $arg . $arg;
-                        }
-
-                        throw new \RuntimeException('cannot double');
-                    },
-                ],
-            ]);
-
-            return ['ok' => self::canon($resolved)];
+            return ['ok' => self::canon(ConformanceAdapter::load($file))];
         } catch (CooperError $e) {
             return ['error' => $e->stage, 'message' => $e->getMessage()];
         }
@@ -113,6 +61,7 @@ final class Conformance
             is_float($value) && is_infinite($value) => ['float' => $value > 0 ? 'inf' : '-inf'],
             is_float($value) => ['float' => $value],
             $value instanceof CooperAtom => ['atom' => $value->name],
+            $value instanceof ConformanceModule => ['module' => $value->writtenName()],
             $value instanceof CooperSecret => ['secret' => self::canon($value->reveal()), 'redacted' => $value->redacted],
             $value instanceof CooperTuple => ['tuple' => array_map(self::canon(...), $value->items)],
             $value instanceof CooperDuration => ['duration' => (string) $value->nanoseconds],

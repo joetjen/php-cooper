@@ -18,34 +18,31 @@ precision the reference keeps (`…00.120Z`); `CooperDateTime` keeps it,
 and it is compared exactly now.
 
 The reference is the authority. A case may differ from it only where
-CASC.md leaves the result to the host language; such a case has a
-`<case>.php.json` holding this port's result, which the test prefers to
-the expected file, and is listed below. There are no behavioural
-divergences: every other case matches the reference exactly.
+CASC.md leaves the result to the host language; such a case would have
+a `<case>.php.json` holding this port's result, which the test prefers
+to the expected file, and be listed below. There is none: every case
+matches the reference exactly.
 
-## Host-language renderings: a module in the result
+## A module in the result
 
 CASC.md §7.5 makes a module name one written form for every
 implementation -- dot-separated PascalCase -- and has each translate it
-into its own host's convention. The oracle renders a module by the name
-as written (`{"module": "Acme.Payments.StripeClient"}`). This port's
-module is a class-string, which the canonical rendering cannot tell from
-an ordinary string, so a case whose result holds one carries an override
-with the convention's translation of the same written names. That is
-not a behaviour difference: the same names are accepted, the same ones
-refused, and each means the module the reference means.
-
-| Case | Reference | This port |
-| --- | --- | --- |
-| `163-module-pascal-case` | `{"module": "Acme.Payments.StripeClient"}`, `"ASCO.HTTPClient"`, `"Cooper"`, `"Foo.Bar"` (trimmed, and from `${FORMATTER}`) | `"Acme\Payments\StripeClient"`, `"ASCO\HTTPClient"`, `"Cooper"`, `"Foo\Bar"`, `"Foo\Bar"` |
-| `920-div-module-tag-elixir-name` | `{"module": "Foo.Bar"}` | `"Foo\Bar"` |
+into its own host's convention; this port's is a class-string
+(`Acme.Payments` -> `"Acme\Payments"`), which nothing tells from an
+ordinary string. The corpus therefore loads with the conformance
+adapter's options (`ConformanceAdapter`), whose `!module` is the
+built-in one with its result marked, and renders a module by the name
+CASC wrote, as the oracle does (`{"module": "Foo.Bar"}`). Cases `163`
+and `920` once carried a `*.php.json` override holding the class-string
+instead; they compare against the reference's expected file now, like
+every other case.
 
 Every case that refuses a module name -- `126` (`crypto`), `164`
 (`Foo.bar`), `165` (`Foo_Bar`), `166` (`Foo..Bar`), `167` (a number),
 `914` (`./handlers/thing.js`) -- is a `resolve` error here as in the
-reference, and needs no override. `126` and `914` had one while each
-implementation accepted its host's own shape (this port took `crypto`
-as a class-string); the shared written form removed the difference.
+reference.
+
+## Integers
 
 One difference is inherent to PHP and needs no override, because the
 canonical rendering cannot see it:

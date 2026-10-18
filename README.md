@@ -224,6 +224,28 @@ composer install
 composer run precommit   # PHPStan (level 8) + PHPUnit
 ```
 
+### The Cooper Conformance Suite
+
+The Cooper Conformance Suite (`libs_prx/cooper_conformance` in the
+Praxis repository) runs every CASC implementation through an adapter
+command, `COMMAND ARGS... REQUEST ANSWER`. This port's is
+`bin/cooper-conformance`, run from the repository root:
+
+```sh
+php bin/cooper-conformance request.json answer.json
+```
+
+It reads `{"cases": [{"id": ..., "operation": "load", "document":
+"/abs/path.casc"}]}` and writes one result per case, in order: the
+loaded value in the suite's typed JSON, or the stage of the error that
+refused it (`lexer`, `parser`, `action`, `import`, `merge`, `loop`,
+`resolve`, `dotenv`). It exits non-zero only when the request cannot be
+read or the answer cannot be written. The work, and the load options
+every case runs with, are in `JOetjen\Cooper\ConformanceAdapter`, the
+twin of the Elixir reference's `Cooper.Conformance`; the in-repo corpus
+(`tests/conformance`) loads with the same options. The command is a
+development tool and is not listed under `composer.json`'s `bin`.
+
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how to propose changes.
 
 ## License

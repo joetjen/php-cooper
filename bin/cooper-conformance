@@ -1,0 +1,33 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * `cooper-conformance REQUEST ANSWER` -- this implementation's adapter
+ * for the Cooper Conformance Suite, the PHP analog of the Elixir
+ * reference's `mix cooper.conformance`. Reads the JSON request at
+ * REQUEST and writes the JSON answer to ANSWER; the work is
+ * `JOetjen\Cooper\ConformanceAdapter::run()`.
+ *
+ * Exits 0 when the answer is written, whatever the cases answered; 1
+ * when the request cannot be read or the answer cannot be written; 2 on
+ * a wrong number of arguments.
+ */
+
+require $GLOBALS['_composer_autoload_path'] ?? __DIR__ . '/../vendor/autoload.php';
+
+use JOetjen\Cooper\ConformanceAdapter;
+
+$arguments = array_slice($argv, 1);
+if (count($arguments) !== 2) {
+    fwrite(STDERR, "usage: cooper-conformance REQUEST ANSWER\n");
+    exit(2);
+}
+
+try {
+    ConformanceAdapter::run($arguments[0], $arguments[1]);
+} catch (\Throwable $e) {
+    fwrite(STDERR, "cooper-conformance: {$e->getMessage()}\n");
+    exit(1);
+}
