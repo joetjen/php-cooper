@@ -35,7 +35,8 @@ Instructions for AI agents working in this PHP codebase.
 
 ## Parity across implementations
 
-- This project mirrors `cooper` (Elixir) -- the same CASC language (`casc/CASC.md`, copied verbatim from `cooper`'s `guides/casc/`), the same pipeline stages, the same error stages, and the same interpolated text for the same value. A behavior change here that also applies to the language itself (not a PHP-specific implementation detail) is worth checking against the Elixir original's behavior -- running a probe through `mix run` in `../cooper` is the quickest way -- though there's no automated cross-repo parity test; this is a judgment call, not a hard gate.
+- This project mirrors `cooper` (Elixir) -- the same CASC language (`casc/CASC.md`, copied verbatim from `cooper`'s `guides/casc/`), the same pipeline stages, the same error stages, and the same interpolated text for the same value. A behavior change here that also applies to the language itself (not a PHP-specific implementation detail) is worth checking against the Elixir original's behavior -- running a probe through `mix run` in `../cooper` is the quickest way.
+- Behaviour is checked across implementations by the Cooper Conformance Suite in the praxis repository (`libs_prx/cooper_conformance`, run by assize); this repository holds no corpus of its own. A behaviour change needs a case there. This repo's adapter for it is `php bin/cooper-conformance REQUEST ANSWER` (`src/ConformanceAdapter.php`, tested by `tests/ConformanceAdapterTest.php`).
 - Where this port deliberately departs from the Elixir original, it does so only where the original contradicts `casc/CASC.md` or where PHP forces a different call. Every such departure is listed in `README.md` ("Where this port differs") and explained at the point of difference in the code; keep both current.
 
 ## Static analysis

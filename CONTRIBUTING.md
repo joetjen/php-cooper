@@ -46,6 +46,8 @@ bug in its own right.
   `MapNode`, ...), the counterparts of `Cooper.Op`/`Cooper.Ref.*`.
 - `tests/` -- PHPUnit, mirroring `src/`'s own layout; `tests/fixtures/`
   holds CASC and `.env` fixtures (most copied from the Elixir suite);
+  `tests/ConformanceAdapterTest.php` tests the Cooper Conformance
+  Suite adapter (`src/ConformanceAdapter.php`, `bin/cooper-conformance`);
   `tests/SPEC_COVERAGE.md` maps every CASC.md section to its tests.
 - `casc/` -- the implementation-independent CASC specification, copied
   verbatim from the Elixir original's `guides/casc/`.
@@ -60,7 +62,11 @@ bug in its own right.
 2. **Check the Elixir original.** A change to how the *language*
    behaves (rather than a PHP-specific detail) should match `cooper` --
    or, where `cooper` contradicts `casc/CASC.md`, be listed in
-   `README.md`'s "Where this port differs" section.
+   `README.md`'s "Where this port differs" section. Behaviour is
+   checked across implementations by the Cooper Conformance Suite in
+   the praxis repository (`libs_prx/cooper_conformance`, run by
+   assize), so a behaviour change needs a case there too. This repo's
+   adapter for it is `php bin/cooper-conformance REQUEST ANSWER`.
 3. **Where inputs form a space bigger than a handful of examples
    usefully covers**, prefer a property-based/fuzz-style test (a
    hand-rolled, seeded randomized loop inside PHPUnit -- no dedicated

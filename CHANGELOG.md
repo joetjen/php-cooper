@@ -35,10 +35,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `casc/CASC.md` is updated from the reference: §7 says a module
   interpolated into a string reads as the name the document wrote.
 
-- The in-repo conformance corpus loads with the adapter's options and
-  renders a module by its written name, so cases `163` and `920` match
-  the reference's expected result and their `*.php.json` overrides are
-  gone.
+### Removed
+
+- **The in-repo conformance corpus** (`tests/conformance`, its
+  `DIVERGENCES.md`, and `ConformanceTest`). Behaviour is checked across
+  implementations by the Cooper Conformance Suite in the praxis
+  repository, which owns the cases now; a behaviour change needs a case
+  there. This repo's adapter for it is `php bin/cooper-conformance
+  REQUEST ANSWER`. The one thing only the corpus covered, a name
+  beginning with `_` (§4.1), is now a `SpecCoverageTest`.
 
 ### Fixed
 
