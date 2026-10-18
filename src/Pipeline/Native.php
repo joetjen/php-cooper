@@ -11,7 +11,8 @@ use JOetjen\Cooper\Value\CooperTuple;
 /**
  * The very last pipeline step: turns the internal `MapNode` maps into
  * the plain associative `array`s a caller gets back, recursing through
- * lists, tuples, and secrets. Everything else -- scalars, value objects,
+ * lists, tuples, and secrets, and gives a `Module` marker back as its
+ * class-string. Everything else -- scalars, value objects,
  * whatever a consumer-registered resolver or tag returned -- passes
  * through untouched.
  *
@@ -45,6 +46,9 @@ final class Native
         }
         if ($value instanceof CooperSecret) {
             return new CooperSecret(self::convert($value->reveal()), $value->redacted);
+        }
+        if ($value instanceof Module) {
+            return $value->classString();
         }
 
         return $value;

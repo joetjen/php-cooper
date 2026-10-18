@@ -90,6 +90,8 @@ encodes sensibly with `json_encode()`.
 Cooper::loadFile('app.casc', ['modules' => ['Store' => \App\Cache\RedisStore::class]]);
 // store = !module("Store")             => 'App\Cache\RedisStore' (mapped)
 // client = !module("Acme.HTTPClient")  => 'Acme\HTTPClient'      (convention)
+// s = "c=%{client}"                    => 'c=Acme.HTTPClient'     (a string reads the written name)
+// t = "s=%{store}"                     => 's=App\Cache\RedisStore' (a mapped one reads as its value)
 ```
 
 ## Literal-only tags

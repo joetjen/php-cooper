@@ -32,10 +32,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `casc/CASC.md` is updated from the reference: §7 says a module
+  interpolated into a string reads as the name the document wrote.
+
 - The in-repo conformance corpus loads with the adapter's options and
   renders a module by its written name, so cases `163` and `920` match
   the reference's expected result and their `*.php.json` overrides are
   gone.
+
+### Fixed
+
+- **A module interpolated into a string reads as the name the document
+  wrote** (CASC.md §7), dot-separated PascalCase, as in every
+  implementation: `"x-!module(\"Foo.Bar\")"` is `x-Foo.Bar`, where it
+  was `x-Foo\Bar`, and so is one reached through a reference
+  (`m = !module("ASCO.HTTPClient")`, `"m=%{m}"` is `m=ASCO.HTTPClient`).
+  A module the application mapped through `modules` reads as the value
+  it maps to. Everywhere else a module is still its class-string: the
+  loaded value, and what a tag, a filter or a list edit is given. The
+  conformance adapter reads the same.
 
 ## [0.1.2] - 2026-10-14
 

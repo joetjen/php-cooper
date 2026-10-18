@@ -122,7 +122,7 @@ final class Resolver
         // of the same name still overrides it, as it may any built-in.
         $this->tags = array_merge(
             self::BUILT_IN_TAGS,
-            ['module' => static fn (mixed $argument): mixed => self::tagModule($argument, $modules)],
+            ['module' => static fn (mixed $argument): mixed => self::builtInModule($argument, $modules)],
             $tags,
         );
     }
@@ -766,7 +766,7 @@ final class Resolver
     private function applyTag(callable $tag, TaggedRef $ref, mixed $argument): mixed
     {
         try {
-            return $tag($argument);
+            return $tag(self::plain($argument));
         } catch (CooperError $e) {
             throw $e;
         } catch (\Throwable $e) {
@@ -908,10 +908,32 @@ final class Resolver
      * resolved, not loaded -- and autoloading has side effects a config
      * load should not trigger.
      *
+     * This gives back the class-string itself; the resolver registers
+     * `builtInModule()`, which holds an unmapped module as a `Module`
+     * marker until the load ends, so it interpolates by its written name.
+     *
      * @param array<string, mixed> $modules written name => what it means
      * @internal
      */
     public static function tagModule(mixed $argument, array $modules = []): mixed
+    {
+        $module = self::builtInModule($argument, $modules);
+
+        return $module instanceof Module ? $module->classString() : $module;
+    }
+
+    /**
+     * The built-in `!module` as the resolver registers it: `tagModule()`,
+     * except that a name the mapping does not hold comes back as a
+     * `Module` marker, so a string it is interpolated into reads as the
+     * name the document wrote (CASC.md §7) -- the load ends with the
+     * class-string all the same (`Native::convert()`).
+     *
+     * @param array<string, mixed> $modules written name => what it means
+     * @return mixed what the mapping holds for the name, else a `Module`
+     * @throws \InvalidArgumentException when the argument is no module name
+     */
+    private static function builtInModule(mixed $argument, array $modules): mixed
     {
         if (!is_string($argument)) {
             throw new \InvalidArgumentException('cannot convert ' . Display::inspect($argument) . ' to a module: not a string');
@@ -927,7 +949,18 @@ final class Resolver
             return $modules[$name];
         }
 
-        return str_replace('.', '\\', $name);
+        return new Module($name);
+    }
+
+    /**
+     * `$value` as a tag, a filter or a list edit sees it: a `Module`
+     * marker as its class-string, anything else as it is. Only a string
+     * a module is interpolated into reads it by its written name; every
+     * other use sees what a load gives back, as it did before the marker.
+     */
+    private static function plain(mixed $value): mixed
+    {
+        return $value instanceof Module ? $value->classString() : $value;
     }
 
     private static function stringArgument(mixed $argument, string $tag): string
@@ -979,8 +1012,8 @@ final class Resolver
         // reference) once did, made a secret unfilterable.
         try {
             return $value instanceof CooperSecret
-                ? new CooperSecret(Filters::apply($value->reveal(), $chain))
-                : Filters::apply($value, $chain);
+                ? new CooperSecret(Filters::apply(self::plain($value->reveal()), $chain))
+                : Filters::apply(self::plain($value), $chain);
         } catch (\InvalidArgumentException $e) {
             throw self::error("{$label}: " . $e->getMessage(), $e);
         }

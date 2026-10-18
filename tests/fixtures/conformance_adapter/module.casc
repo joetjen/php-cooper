@@ -1,3 +1,5 @@
 #@version = 1.0
 m = !module("Acme.Payments.StripeClient")
 n = !module("${FORMATTER}")
+s = "n=%{n}"
+t = "x-!module(\"Foo.Bar\")"
