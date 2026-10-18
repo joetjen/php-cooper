@@ -98,7 +98,10 @@ PHP-specific choices:
   §7.5). The `modules` option maps a name exactly as written to
   whatever `!module` should give back for it instead
   (`['modules' => ['Store' => RedisStore::class]]`); the class is never
-  loaded or checked.
+  loaded or checked. Interpolated into a string, a module reads as the
+  name the document wrote, as in every implementation (§7):
+  `"x-!module(\"Foo.Bar\")"` is `x-Foo.Bar`, not `x-Foo\Bar`; a mapped
+  one reads as the value it maps to.
 - **`.env` support** parses with
   [`vlucas/phpdotenv`](https://github.com/vlucas/phpdotenv), a
   dependency of Cooper's (the Elixir original uses `dotenvy`). The

@@ -43,13 +43,14 @@ final class ConformanceModule implements \Stringable
     }
 
     /**
-     * The class-string, so the marker reads in a string context as the
-     * module an ordinary load would have given back.
+     * The written name, so a string the module is interpolated into reads
+     * as CASC.md §7 says it does in every implementation (`x-Foo.Bar`),
+     * as it does in an ordinary load.
      *
-     * @return string the class-string
+     * @return string the dot-separated PascalCase name
      */
     public function __toString(): string
     {
-        return $this->classString;
+        return $this->writtenName();
     }
 }

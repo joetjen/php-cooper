@@ -259,7 +259,7 @@ final class ConformanceAdapterTest extends TestCase
         );
     }
 
-    public function testAModuleInADocumentAnswersTheNameAsWritten(): void
+    public function testAModuleInADocumentAnswersTheNameAsWrittenAndReadsSoInAString(): void
     {
         $answer = ConformanceAdapter::answer(['cases' => [self::load('module.casc')]]);
 
@@ -269,6 +269,8 @@ final class ConformanceAdapterTest extends TestCase
                 'result' => ['map' => [
                     ['m', self::tagged('casc/module', 'Acme.Payments.StripeClient')],
                     ['n', self::tagged('casc/module', 'Foo.Bar')],
+                    ['s', 'n=Foo.Bar'],
+                    ['t', 'x-Foo.Bar'],
                 ]],
             ]]],
             $answer,
