@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Error categories are part of the language** (CASC.md §9.5): every
+  load-time error belongs to one of `lexer`, `parser`, `action`,
+  `import`, `merge`, `loop`, `resolve` and `dotenv` -- the stages this
+  implementation already reported. The spec copy is updated.
+
 - **An adapter for the Cooper Conformance Suite**, the twin of the
   Elixir reference's `Cooper.Conformance`: `php bin/cooper-conformance
   REQUEST ANSWER`, its work in `ConformanceAdapter`. It reads a JSON
