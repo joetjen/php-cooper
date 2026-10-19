@@ -98,7 +98,10 @@ PHP-specific choices:
   §7.5). The `modules` option maps a name exactly as written to
   whatever `!module` should give back for it instead
   (`['modules' => ['Store' => RedisStore::class]]`); the class is never
-  loaded or checked.
+  loaded or checked. Interpolated into a string, a module reads as the
+  name the document wrote, as in every implementation (§7):
+  `"x-!module(\"Foo.Bar\")"` is `x-Foo.Bar`, not `x-Foo\Bar`; a mapped
+  one reads as the value it maps to.
 - **`.env` support** parses with
   [`vlucas/phpdotenv`](https://github.com/vlucas/phpdotenv), a
   dependency of Cooper's (the Elixir original uses `dotenvy`). The
@@ -156,9 +159,9 @@ PHP-specific choices:
   callbacks instead of `:telemetry`.
 
 Porting the Elixir original also found ten places where it (as of
-0.4.0) contradicted CASC.md, and a corpus of conformance cases shared
-by every Cooper implementation (`tests/conformance`, see its
-`DIVERGENCES.md`) found fourteen more. All are fixed in the Elixir
+0.4.0) contradicted CASC.md, and the corpus of conformance cases
+shared by every Cooper implementation (since retired for the Cooper
+Conformance Suite) found fourteen more. All are fixed in the Elixir
 original's 0.5.0, which is the reference this port matches case for
 case:
 
@@ -223,6 +226,34 @@ Requires PHP 8.2+ with `mbstring`.
 composer install
 composer run precommit   # PHPStan (level 8) + PHPUnit
 ```
+
+### The Cooper Conformance Suite
+
+The Cooper Conformance Suite (`libs_prx/cooper_conformance` in the
+Praxis repository) runs every CASC implementation through an adapter
+command, `COMMAND ARGS... REQUEST ANSWER`. This port's is
+`bin/cooper-conformance`, run from the repository root:
+
+```sh
+php bin/cooper-conformance request.json answer.json
+```
+
+It reads `{"cases": [{"id": ..., "operation": "load", "document":
+"/abs/path.casc"}]}` and writes one result per case, in order: the
+loaded value in the suite's typed JSON (what Praxis notation has no
+literal for is a tuple tagged with a namespaced keyword: `casc/duration`,
+`casc/bytes`, `casc/secret`, `casc/module`, `casc/float`, `casc/ipv4`,
+`casc/ipv6`, `casc/date`, `casc/time`, `casc/local-date-time`,
+`casc/date-time`), or the stage of the error that
+refused it (`lexer`, `parser`, `action`, `import`, `merge`, `loop`,
+`resolve`, `dotenv`). It exits non-zero only when the request cannot be
+read or the answer cannot be written. The work, and the load options
+every case runs with, are in `JOetjen\Cooper\ConformanceAdapter`, the
+twin of the Elixir reference's `Cooper.Conformance`. The command is a
+development tool and is not listed under `composer.json`'s `bin`.
+
+Behaviour is checked across implementations by the suite, not by a
+corpus in this repository: a behaviour change needs a case there.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how to propose changes.
 

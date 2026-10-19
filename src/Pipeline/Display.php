@@ -21,6 +21,7 @@ use JOetjen\Cooper\Value\CooperTuple;
  * reads as CASC writes it": floats in Erlang's shortest form (`1.0`,
  * `52.52`, `1.0e3`), `nil` as `"nil"`, infinity as `"inf"`/`"-inf"`,
  * durations and byte sizes in their base unit (`500000000ns`, `512B`),
+ * a module by the name the document wrote (`Foo.Bar`, see `Module`),
  * and offset date-times in UTC as `1979-05-27 05:32:00Z`, with the
  * fractional digits as written (`CooperDateTime`). A `DateTimeInterface`
  * a consumer's own tag or resolver returns has no written precision; it
@@ -58,6 +59,9 @@ final class Display
             $value === false => 'false',
             $value === null => 'nil',
             $value instanceof CooperAtom => $value->name,
+            // As the document wrote it (§7), not as the class-string a
+            // load gives back.
+            $value instanceof Module => $value->writtenName,
             $value instanceof CooperSecret => (string) $value,
             $value instanceof \DateTimeInterface => self::dateTime($value),
             $value instanceof \Stringable => (string) $value,
@@ -70,7 +74,7 @@ final class Display
      */
     public static function displayable(mixed $value): bool
     {
-        return is_scalar($value) || $value === null || $value instanceof \Stringable || $value instanceof \DateTimeInterface;
+        return is_scalar($value) || $value === null || $value instanceof Module || $value instanceof \Stringable || $value instanceof \DateTimeInterface;
     }
 
     /**
@@ -138,6 +142,7 @@ final class Display
             $value === null => 'nil',
             is_bool($value), is_int($value) => self::toString($value),
             $value instanceof CooperAtom => ':' . $value->name,
+            $value instanceof Module => self::inspect($value->classString()),
             $value instanceof CooperSecret => CooperSecret::MARKER,
             $value instanceof CooperTuple => '{' . implode(', ', array_map(self::inspect(...), $value->items)) . '}',
             $value instanceof MapNode => '%{' . implode(', ', array_map(

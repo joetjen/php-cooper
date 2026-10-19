@@ -1,0 +1,7 @@
+#@version = 1.0
+import "mem://base"
+import "mem://vars"
+echoed = !{echo:hello}
+n = !twice(21)
+s = !twice("ab")
+mem_var = @{mem_var}

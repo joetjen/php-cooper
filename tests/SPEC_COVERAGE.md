@@ -15,7 +15,7 @@ per the spec itself.
 | 2 | Mandatory header | ✅ | `Pipeline/GrammarTest` (header forms, a comment before it, mismatched keyword, missing header); `SpecCoverageTest` ("a missing version header") |
 | 3.1 | Whitespace | ✅ | `Syntax/LexerTest` (trivia); `Pipeline/GrammarTest` (statements sharing a line) |
 | 3.2 | Comments | ✅ | `Pipeline/GrammarTest` (`# comment` vs `#TODO`); `Syntax/LexerTest` (`#` before a letter/`*`/`@` is a token) |
-| 4.1 | Key names, atoms, variable names | ✅ | `Pipeline/EvaluatorTest` (atoms); `Pipeline/GrammarTest` (contextual keywords as keys); `Syntax/LexerTest` (identifier punctuation); conformance case `014-underscore-names` (a name beginning with `_`: key, variable, atom) |
+| 4.1 | Key names, atoms, variable names | ✅ | `Pipeline/EvaluatorTest` (atoms); `Pipeline/GrammarTest` (contextual keywords as keys); `Syntax/LexerTest` (identifier punctuation); `SpecCoverageTest` (a name beginning with `_`: key, variable, atom) |
 | 4.2 | Quoted key segments | ✅ | `Pipeline/GrammarTest` (double/single-quoted, dotted position); `Pipeline/MergeTest` (interpolated keys outside loops, and their rules); `Pipeline/LoopTest` (the same rules for a key built from a binding) |
 | 4.3 | Secret keys | ✅ | `Pipeline/GrammarTest` (all three prefix positions); `CooperTest`, `Value/CooperSecretTest` (wrapping, every redacting display surface); `Pipeline/ResolverTest` (secrecy travels through `%{...}`, `for ... from`, tags, indexing; partial redaction); `Pipeline/MergeTest` (later flag wins, delete forgets) |
 | 5.1 | Imports | ✅ | `Pipeline/LoaderTest` (relative resolution, visibility, globs/braces, cycles, unregistered scheme, no match, `${NAME}` in a path with every rejection, scheme loader failure, a scheme cycle and a scheme importing itself, errors naming the imported file); `CacheTest` (import fingerprinting, env-selected import refresh) |
@@ -35,11 +35,11 @@ per the spec itself.
 | 6.9 | Byte sizes | ✅ | `Pipeline/EvaluatorTest`; `SpecCoverageTest` (decimal and binary unit tables); `Syntax/LiteralsTest` (exact, every digit beyond 64 bits) |
 | 6.10 | Lists | ✅ | `Pipeline/EvaluatorTest` (separators, mixed types, empty); `Pipeline/MergeTest` (maps inside lists and tuples: interpolated keys, loop bindings, secrets, `+`/`-` by value) |
 | 6.11 | Tuples | ✅ | `Pipeline/EvaluatorTest`; `CooperTest` (a real `CooperTuple` end to end); `Value/ValueObjectsTest` |
-| 7.1 | Variables (`@{}`) | ✅ | `Pipeline/EvaluatorTest` (unresolved shape); `Pipeline/ResolverTest` (suffixes, indexing past either end, value that is itself a reference, cycles, every value's string form) |
-| 7.2 | Environment expansion (`${}`) | ✅ | `Pipeline/ResolverTest` (worked example, always a string, unset/empty, list and index, `:+1` a substitute and `:-1` a default, an interpolating `:?` message); `Pipeline/EvaluatorTest` (the sign after `:` decides); `SpecCoverageTest` (`${?NAME}`); `Pipeline/FiltersTest` (every filter, chaining, after the suffix, both quote styles, bare/interpolated parity, errors, a secret filtered and kept secret); `Pipeline/BuiltNamesTest` (built names and keys, every guardrail); `DotenvTest` (`${COOPER_ENV}`: a set one wins, empty/unset falls back to `APP_ENV` from every layer, else `dev`; the fallback's shared-name table, a real one never mapped; property); `CacheTest` (the fallback is what the env check sees); conformance case 168 |
-| 7.3 | Config references (`%{}`) | ✅ | `Pipeline/ResolverTest` (worked example, final-tree timing, cycles, through a `Layered` value, a path followed through a reference, a chain of them, or a loop variable bound to a block element, a path into a secret block element whose found value stays secret, a missing key behind one taking its default, a reference to a scalar undefined below it, a path through its own key a cycle); `ConformanceTest` (cases 188-191) |
+| 7.1 | Variables (`@{}`) | ✅ | `Pipeline/EvaluatorTest` (unresolved shape); `Pipeline/ResolverTest` (suffixes, indexing past either end, value that is itself a reference, cycles, every value's string form, a module by its written name directly, through `%{}` or `@{}`, a mapped one as its value) |
+| 7.2 | Environment expansion (`${}`) | ✅ | `Pipeline/ResolverTest` (worked example, always a string, unset/empty, list and index, `:+1` a substitute and `:-1` a default, an interpolating `:?` message); `Pipeline/EvaluatorTest` (the sign after `:` decides); `SpecCoverageTest` (`${?NAME}`); `Pipeline/FiltersTest` (every filter, chaining, after the suffix, both quote styles, bare/interpolated parity, errors, a secret filtered and kept secret); `Pipeline/BuiltNamesTest` (built names and keys, every guardrail); `DotenvTest` (`${COOPER_ENV}`: a set one wins, empty/unset falls back to `APP_ENV` from every layer, else `dev`; the fallback's shared-name table, a real one never mapped; property); `CacheTest` (the fallback is what the env check sees) |
+| 7.3 | Config references (`%{}`) | ✅ | `Pipeline/ResolverTest` (worked example, final-tree timing, cycles, through a `Layered` value, a path followed through a reference, a chain of them, or a loop variable bound to a block element, a path into a secret block element whose found value stays secret, a missing key behind one taking its default, a reference to a scalar undefined below it, a path through its own key a cycle) |
 | 7.4 | Extensible resolution (`!{}`) | ✅ | `Pipeline/EvaluatorTest` (first colon, nested braces); `Pipeline/ResolverTest` (dispatch, unregistered, failing resolver) |
-| 7.5 | Tagged values (`!Name()`) | ✅ | `Pipeline/ResolverTest` (built-ins, failures, consumer tag, unregistered); `Pipeline/FiltersTest` (normalizing tags); `Pipeline/ModuleTagTest` (`!module`: PascalCase acceptance and the class-string convention, every rejection incl. a mapped non-PascalCase name, the exact-case `modules` mapping through `loadString`/cached `loadFile`, no load-time class check); conformance 126, 163-167, 914, 920 |
+| 7.5 | Tagged values (`!Name()`) | ✅ | `Pipeline/ResolverTest` (built-ins, failures, consumer tag, unregistered); `Pipeline/FiltersTest` (normalizing tags); `Pipeline/ModuleTagTest` (`!module`: PascalCase acceptance and the class-string convention, every rejection incl. a mapped non-PascalCase name, the exact-case `modules` mapping through `loadString`/cached `loadFile`, no load-time class check) |
 | 8.1 | Blocks and maps | ✅ | `Pipeline/MergeTest` |
 | 8.2 | Lists | ✅ | `Pipeline/MergeTest` (and `+`/`-` operands: `nil` as one element, strict removal, a later-declared reference, a list still a reference, a tuple refused) |
 | 8.3 | Tuples | ✅ | `Pipeline/MergeTest` (plain replace; `~`/`+`/`-` errors) |
@@ -56,9 +56,12 @@ with Elixir (`Pipeline/DisplayTest`, floats generated by Elixir itself),
 and robustness (`Syntax/ParserFuzzTest`: random and mutated input only
 ever fails with `CooperError`).
 
-Every section is also exercised end to end by the shared conformance
-corpus (`ConformanceTest`, `tests/conformance`), each case compared with
-the Elixir reference's own result.
+Behaviour is checked across implementations, end to end, by the Cooper
+Conformance Suite in the praxis repository (`libs_prx/cooper_conformance`,
+run by assize); a behaviour change needs a case there. This repo's
+adapter for it is `php bin/cooper-conformance REQUEST ANSWER`, tested by
+`ConformanceAdapterTest` (the suite's typed JSON, every error as its
+§9.5 stage, the request and answer files, and the command).
 
 ## Open design questions CASC.md doesn't answer
 

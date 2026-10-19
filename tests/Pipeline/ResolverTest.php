@@ -276,6 +276,68 @@ final class ResolverTest extends CooperTestCase
         self::assertSame('unregistered tag !uuid(...)', self::resolveError('v = !uuid("x")')->getMessage());
     }
 
+    // ---- a module in a string (CASC.md §7) ------------------------------------------
+
+    // A module reads as the name the document wrote, in every
+    // implementation -- not as this host's spelling of it, a class-string
+    // with `\` for every dot.
+
+    public function testAModuleInterpolatesAsTheNameCascWrote(): void
+    {
+        self::assertSame(['s' => 'x-Foo.Bar'], self::resolve('s = "x-!module(\"Foo.Bar\")"'));
+    }
+
+    public function testAndSoDoesOneReachedThroughAReference(): void
+    {
+        self::assertSame('m=ASCO.HTTPClient', self::resolve("m = !module(\"ASCO.HTTPClient\")\ns = \"m=%{m}\"")['s']);
+    }
+
+    public function testAndSoDoesOneHeldInAVariable(): void
+    {
+        self::assertSame(['s' => 'm=Acme.Client'], self::resolve("@m = !module(\"Acme.Client\")\ns = \"m=@{m}\""));
+    }
+
+    // A mapped module is whatever the application mapped it to, so it
+    // reads as that value does -- the one place the written name is not kept.
+    public function testAModuleTheApplicationMappedReadsAsTheModuleItMapsTo(): void
+    {
+        self::assertSame(['s' => 'x-crypto'], self::resolve('s = "x-!module(\"Crypto\")"', ['modules' => ['Crypto' => 'crypto']]));
+    }
+
+    public function testAModuleReferencedAsAWholeValueIsStillItsClassString(): void
+    {
+        self::assertSame(
+            ['m' => 'Foo\\Bar', 'n' => 'Foo\\Bar', 'l' => ['Foo\\Bar']],
+            self::resolve("m = !module(\"Foo.Bar\")\nn = %{m}\nl = [%{m}]"),
+        );
+    }
+
+    public function testASecretModuleIsStillASecretClassString(): void
+    {
+        $value = self::resolve('*m = !module("Foo.Bar")')['m'];
+
+        self::assertInstanceOf(CooperSecret::class, $value);
+        self::assertSame('Foo\\Bar', $value->reveal());
+    }
+
+    // Pinned current behaviour: a tag or a filter given a module gets the
+    // class-string, as it did before a module read as its written name.
+    public function testATagOrAFilterGivenAModuleGetsItsClassString(): void
+    {
+        self::assertSame(
+            ['m' => 'Foo\\Bar', 'a' => 'FOO\\BAR', 'b' => 'foo\\bar'],
+            self::resolve("m = !module(\"Foo.Bar\")\na = !upcase(%{m})\nb = %{m | downcase}"),
+        );
+    }
+
+    public function testAModuleIsRemovedFromAListByTheSameModule(): void
+    {
+        self::assertSame(
+            ['l' => ['B']],
+            self::resolve("@l = [!module(\"A.B\"), !module(\"B\")]\nl = @{l}\n-l = [!module(\"A.B\")]"),
+        );
+    }
+
     // ---- for ... from, and the combined fixture ----------------------------------
 
     public function testLoopTemplateBaseAndOverridesMergePerReplica(): void
