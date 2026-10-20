@@ -1,6 +1,6 @@
 {
   "name": "joetjen/cooper",
-  "description": "Loads CASC config files -- a hierarchical, extensible config language with imports, variables, interpolation, loops, and consumer-registered resolvers/tags -- into native PHP values, secrets redacted by default.",
+  "description": "Under heavy development: not for production use before 1.0.0. Loads CASC config files -- a hierarchical, extensible config language with imports, variables, interpolation, loops, and consumer-registered resolvers/tags -- into native PHP values, secrets redacted by default.",
   "keywords": ["casc", "cooper", "config", "configuration", "dotenv"],
   "type": "library",
   "homepage": "http://github.com/joetjen/php-cooper",
