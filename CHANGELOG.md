@@ -12,7 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **The README opens with a warning**: under heavy development, not for
   production use before `1.0.0`. Things can and will break, and the
   specification can and will change, between any two releases until
-  then. The package description says so too.
+  then. The package description and the API documentation's front
+  page say so too.
 
 ### Changed
 
