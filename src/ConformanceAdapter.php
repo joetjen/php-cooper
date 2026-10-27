@@ -44,8 +44,8 @@ use JOetjen\Cooper\Value\CooperTuple;
  * resolvers `echo` (answers its payload) and `fail` (refuses), the tag
  * `twice` (doubles an integer, repeats a string) and the import scheme
  * `mem` (`mem://base`, `mem://vars`). `!module` is the built-in one,
- * with no `modules` mapping, its result marked so the answer can name
- * the module (see `ConformanceModule`).
+ * its result marked so the answer can name the module (see
+ * `ConformanceModule`), with the mapping in `MODULES`.
  *
  * ## Values
  *
@@ -79,6 +79,12 @@ final class ConformanceAdapter
         'FORMATTER' => 'Foo.Bar',
         'COOPER_ENV' => 'conformance',
     ];
+
+    /**
+     * The application's `modules` mapping every adapter holds: a mapped
+     * module reads in a string as what it maps to (CASC.md §7), `crypto`.
+     */
+    private const MODULES = ['Crypto' => 'crypto'];
 
     /** What the `mem` import scheme serves, by the rest of its URI. */
     private const MEM = [
@@ -274,12 +280,14 @@ final class ConformanceAdapter
                     throw new \RuntimeException('cannot double ' . get_debug_type($argument));
                 },
                 // The built-in `!module`, marked so the answer can name the
-                // module rather than show a class-string no string differs from.
-                'module' => static function (mixed $argument): ConformanceModule {
+                // module rather than show a class-string no string differs from;
+                // a name `MODULES` maps is what it maps to, as in a load.
+                'module' => static function (mixed $argument): mixed {
                     $module = Resolver::tagModule($argument);
                     assert(is_string($module));
+                    $written = new ConformanceModule($module);
 
-                    return new ConformanceModule($module);
+                    return self::MODULES[$written->writtenName()] ?? $written;
                 },
             ],
             'importSchemes' => [
